@@ -7,11 +7,11 @@ import clsx from 'clsx';
 
 // Colors map to Tailwind classes or CSS variables
 const COLOR_MAP = {
-    'red': 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]',
-    'blue': 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]',
-    'green': 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]',
-    'yellow': 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]',
-    'purple': 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]'
+    'red': { class: 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]', icon: '❤️' },
+    'blue': { class: 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]', icon: '💧' },
+    'green': { class: 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]', icon: '🍀' },
+    'yellow': { class: 'bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]', icon: '⚡' },
+    'purple': { class: 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]', icon: '⭐' }
 };
 
 export default function AnxietyGame() {
@@ -70,9 +70,9 @@ export default function AnxietyGame() {
                         <div key={i} className="flex-1 h-full rounded transition-all duration-300 relative">
                             {item && (
                                 <div className={clsx(
-                                    "w-full h-full rounded animate-in zoom-in spin-in-3 duration-300",
-                                    COLOR_MAP[item.color]
-                                )}></div>
+                                    "w-full h-full rounded animate-in zoom-in spin-in-3 duration-300 flex items-center justify-center text-sm",
+                                    COLOR_MAP[item.color].class
+                                )}>{COLOR_MAP[item.color].icon}</div>
                             )}
                         </div>
                     );
@@ -95,12 +95,14 @@ export default function AnxietyGame() {
                             onClick={() => handleTileClick(x, y)}
                             className={clsx(
                                 "rounded-md transition-all duration-200 cursor-pointer hover:brightness-110",
-                                tile ? COLOR_MAP[tile.color] : "bg-white/5",
+                                tile ? COLOR_MAP[tile.color].class : "bg-white/5",
                                 selected?.x === x && selected?.y === y && "ring-4 ring-white z-10 scale-105",
                                 !tile && selected && "ring-2 ring-white/20 ring-inset" // Potential target hint
                             )}
                         >
-                            {/* Inner content (icon or shine) */}
+                            <div className="flex items-center justify-center w-full h-full text-lg sm:text-2xl filter drop-shadow opacity-90">
+                                {tile && COLOR_MAP[tile.color].icon}
+                            </div>
                         </div>
                     ))
                 ))}
