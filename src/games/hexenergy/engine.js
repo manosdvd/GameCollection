@@ -123,7 +123,16 @@ export class HexEnergyEngine {
 
         // Bind context
         this.handleResize = this.handleResize.bind(this);
-        window.addEventListener('resize', this.handleResize);
+
+        // Use ResizeObserver for robust element sizing
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === this.container) {
+                    this.handleResize();
+                }
+            }
+        });
+        this.resizeObserver.observe(this.container);
 
         // Particle Canvas
         this.canvas = document.createElement('canvas');
@@ -132,14 +141,12 @@ export class HexEnergyEngine {
         this.canvas.style.left = '0';
         this.canvas.style.pointerEvents = 'none';
         this.canvas.style.zIndex = '50';
-        // Append to body or container? Body is safer for full screen particles
-        // But container is cleaner for cleanup. Let's try container.
         this.container.appendChild(this.canvas);
         this.ctx = this.canvas.getContext('2d');
     }
 
     destroy() {
-        window.removeEventListener('resize', this.handleResize);
+        if (this.resizeObserver) this.resizeObserver.disconnect();
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.container.innerHTML = ''; // Dangerous if React manages it?
         // Actually, we should just remove what we added.

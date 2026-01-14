@@ -1,7 +1,6 @@
-/* HexEnergy Specific Styles */
 #hex-grid {
     position: relative;
-    margin: auto;
+    /* margin: auto;  Removed: Parent container uses flex centering */
     transition: width 0.3s, height 0.3s;
 }
 
