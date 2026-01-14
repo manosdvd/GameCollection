@@ -17,7 +17,8 @@ const INITIAL_STATE = {
     inventory: { radius: 0, col: 0, row: 0, x: 0, color: 0 },
     activeTool: null,
     comboChain: 0,
-    tickRate: 1200
+    tickRate: 1200,
+    events: [] // Queue of one-shot events (matches, explosions, etc)
 };
 
 // --- Utils ---
@@ -119,9 +120,11 @@ function reducer(state, action) {
 
             const newGrid = state.grid.map(row => [...row]);
             let destroyedCount = 0;
+            const toolEvents = [];
 
             const destroy = (y, x) => {
                 if (y >= 0 && y < ROWS && x >= 0 && x < COLS && newGrid[y][x]) {
+                    toolEvents.push({ type: 'EXPLOSION', x, y, color: newGrid[y][x].color });
                     newGrid[y][x] = null;
                     destroyedCount++;
                 }
@@ -151,6 +154,9 @@ function reducer(state, action) {
             }
 
             const points = destroyedCount * 5;
+            if (destroyedCount > 0) {
+                toolEvents.push({ type: 'FLOAT_TEXT', x: c, y: r, text: 'BOOM!', color: '#ef4444' });
+            }
 
             return {
                 ...state,
@@ -159,7 +165,8 @@ function reducer(state, action) {
                 activeTool: null,
                 score: state.score + points,
                 levelScore: state.levelScore + points,
-                shouldCheckMatches: true // Gravity needs to happen
+                shouldCheckMatches: true,
+                events: [...(state.events || []), ...toolEvents]
             };
         }
 
@@ -218,6 +225,9 @@ function reducer(state, action) {
             };
         }
 
+        case 'CLEAR_EVENTS':
+            return { ...state, events: [] };
+
         case 'SELECT_TOOL':
             return { ...state, activeTool: action.tool };
 
@@ -270,6 +280,7 @@ export function useAnxietyEngine() {
     const selectTool = (tool) => dispatch({ type: 'SELECT_TOOL', tool });
     const reset = () => dispatch({ type: 'RESET' });
     const togglePause = () => dispatch({ type: 'TOGGLE_PAUSE' });
+    const consumeEvents = () => dispatch({ type: 'CLEAR_EVENTS' });
 
     return {
         ...state,
@@ -277,6 +288,7 @@ export function useAnxietyEngine() {
         useTool,
         selectTool,
         reset,
-        togglePause
+        togglePause,
+        consumeEvents
     };
 }

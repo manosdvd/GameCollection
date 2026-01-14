@@ -35,17 +35,92 @@ const POWERUP_ICONS = {
 export default function AnxietyGame() {
     const {
         grid, preview, previewIndex, score, level, gameOver, paused,
-        inventory, activeTool,
-        swapTiles, useTool, selectTool, reset, togglePause
+        inventory, activeTool, events,
+        swapTiles, useTool, selectTool, reset, togglePause, consumeEvents
     } = useAnxietyEngine();
 
     const { playClick, playSuccess, playError, playTone } = useSound();
     const { triggerHaptic } = useSettings();
 
-    const [selected, setSelected] = useState(null); // {x, y}
+    const [selected, setSelected] = useState(null);
     const [shake, setShake] = useState(false);
+    const [particles, setParticles] = useState([]);
+    const [floatingTexts, setFloatingTexts] = useState([]);
+    const particleIdRef = useRef(0);
 
-    // Shake effect on events
+    // Consume Events
+    useEffect(() => {
+        if (events && events.length > 0) {
+            events.forEach(ev => {
+                if (ev.type === 'MATCH') {
+                    spawnParticles(ev.x, ev.y, ev.color, 6);
+                    playTone(600 + (Math.random() * 200), 'square', 0.05);
+                } else if (ev.type === 'EXPLOSION') {
+                    spawnParticles(ev.x, ev.y, ev.color, 12);
+                    playTone(200, 'sawtooth', 0.1);
+                    setShake(true);
+                    setTimeout(() => setShake(false), 200);
+                } else if (ev.type === 'FLOAT_TEXT') {
+                    spawnText(ev.x, ev.y, ev.text, ev.color);
+                } else if (ev.type === 'LEVEL_UP') {
+                    playSuccess();
+                    spawnText(3, 4, `LEVEL ${ev.level}!`, '#ffb700');
+                }
+            });
+            consumeEvents();
+        }
+    }, [events]);
+
+    // Cleanup Loop (Animation)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setParticles(prev => prev.filter(p => p.life > 0).map(p => ({
+                ...p,
+                x: p.x + p.vx,
+                y: p.y + p.vy,
+                vy: p.vy + 2, // gravity
+                life: p.life - 0.1
+            })));
+            setFloatingTexts(prev => prev.filter(t => t.life > 0).map(t => ({
+                ...t,
+                yPx: t.yPx - 2,
+                life: t.life - 0.05
+            })));
+        }, 50);
+        return () => clearInterval(interval);
+    }, []);
+
+    const spawnParticles = (gx, gy, colorName, count) => {
+        const newP = [];
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 0.5 + Math.random();
+            newP.push({
+                id: particleIdRef.current++,
+                x: (gx * 12.5) + 6.25, // % position (100/8 = 12.5)
+                y: (gy * 10) + 5,      // % position (100/10 = 10)
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 2,
+                color: colorName,
+                life: 1.0
+            });
+        }
+        setParticles(prev => [...prev, ...newP]);
+    };
+
+    const spawnText = (gx, gy, text, color) => {
+        setFloatingTexts(prev => [...prev, {
+            id: Date.now() + Math.random(),
+            x: (gx * 12.5) + 6.25,
+            y: (gy * 10) + 5,
+            yPx: 0,
+            text,
+            color,
+            life: 2.0
+        }]);
+    };
+
+    // Shake effect (Legacy check)
     useEffect(() => {
         if (gameOver) {
             triggerHaptic(500);
@@ -162,7 +237,6 @@ export default function AnxietyGame() {
                 )}
             </div>
 
-            {/* Main Grid */}
             <div
                 className="w-full max-w-md aspect-[4/5] bg-black/40 rounded-lg p-1 grid gap-1 relative z-10 border border-white/10"
                 style={{
@@ -170,6 +244,36 @@ export default function AnxietyGame() {
                     gridTemplateRows: `repeat(10, 1fr)`
                 }}
             >
+                {/* PARTICLE LAYER */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+                    {particles.map(p => (
+                        <div
+                            key={p.id}
+                            className={clsx("absolute w-2 h-2 rounded-full", COLOR_STYLES[p.color].split(' ')[1])}
+                            style={{
+                                left: `${p.x}%`,
+                                top: `${p.y}%`,
+                                opacity: p.life,
+                                transform: 'scale(' + p.life + ')'
+                            }}
+                        />
+                    ))}
+                    {floatingTexts.map(t => (
+                        <div
+                            key={t.id}
+                            className="absolute font-black text-xl text-white drop-shadow-md z-50 whitespace-nowrap"
+                            style={{
+                                left: `${t.x}%`,
+                                top: `${t.y}%`,
+                                color: t.color,
+                                transform: `translate(-50%, -50%) translateY(${t.yPx}px)`,
+                                opacity: Math.min(1, t.life)
+                            }}
+                        >
+                            {t.text}
+                        </div>
+                    ))}
+                </div>
                 {grid.map((row, y) => (
                     row.map((tile, x) => {
                         const isSelected = selected?.x === x && selected?.y === y;
