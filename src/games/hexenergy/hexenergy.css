@@ -1,0 +1,118 @@
+/* HexEnergy Specific Styles */
+#hex-grid {
+    position: relative;
+    margin: auto;
+    transition: width 0.3s, height 0.3s;
+}
+
+.hex-wrapper {
+    position: absolute;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Hex Masking for cleaner hover effects if needed */
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    transition: transform 0.1s, filter 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hex-wrapper:active {
+    transform: scale(0.92);
+}
+
+.hex-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Bouncy */
+}
+
+.hex-inner svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+}
+
+.hex-inner.locked {
+    filter: grayscale(1);
+    opacity: 0.8;
+}
+
+/* Pipes & Fluids */
+.pipe-track {
+    fill: none;
+    stroke: #111;
+    stroke-width: 20;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pipe-wire {
+    fill: none;
+    stroke: #555;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.3s;
+}
+
+.fluid-segment {
+    fill: none;
+    stroke: #00ffaa;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+.fluid-segment.lit,
+.fluid-center.lit {
+    opacity: 1;
+    filter: drop-shadow(0 0 4px #00ffaa);
+}
+
+.node-base {
+    fill: #555;
+    transition: fill 0.3s;
+}
+
+.fluid-center {
+    fill: #00ffaa;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+.hex-inner.anchor .node-base {
+    r: 9;
+    stroke: #000;
+    stroke-width: 3;
+}
+
+.fluid-center.anchor-lit {
+    r: 9;
+    opacity: 1;
+    filter: drop-shadow(0 0 12px #00ffaa);
+    animation: pulse-anchor 2s infinite;
+}
+
+@keyframes pulse-anchor {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+}
