@@ -153,6 +153,26 @@ export class HexEnergyEngine {
     }
 
     loadLevel(levelIndex) {
+        // Validation: If resuming, do we have a saved game for THIS level?
+        // Or just a saved game in general? 
+        // User wants to resume "active game".
+
+        // Try loading saved state first only if we haven't specified a specific level force-load?
+        // Actually simpler: Engine always tries to load 'hexenergy_state' on init?
+        // But loadLevel is called by Component on init.
+
+        // Let's check if the saved state matches the requested level?
+        const saved = localStorage.getItem('hexenergy_state');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.level === levelIndex && !parsed.victory) {
+                    this.loadGameFromState(parsed);
+                    return;
+                }
+            } catch (e) { console.error(e); }
+        }
+
         this.level = levelIndex;
         // Logic from newPuzzle
         let sizeIndex = this.level - 1;
@@ -167,7 +187,61 @@ export class HexEnergyEngine {
         this.loadGameFromSeed(seedCode);
     }
 
+    loadGameFromState(state) {
+        this.level = state.level;
+        this.moves = state.moves;
+        this.timer = state.timer;
+        this.GRID_W = state.w;
+        this.GRID_H = state.h;
+        this.currentSeedCode = state.seedCode;
+
+        // Init logic same as loadGameFromSeed but restoring rotations
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => {
+            this.timer++;
+            this.saveProgress();
+            if (this.callbacks.onStats) this.callbacks.onStats(this.moves, this.timer);
+        }, 1000);
+
+        let [dims, sVal] = state.seedCode.split(':');
+        seedRNG(parseInt(sVal));
+        this.generateLevel(); // Generates base shapes
+
+        // Restore rotations
+        if (state.rotations && state.rotations.length === this.GRID_H * this.GRID_W) {
+            let idx = 0;
+            for (let row of this.grid) {
+                for (let t of row) {
+                    t.setRotation(state.rotations[idx]);
+                    idx++;
+                }
+            }
+        }
+
+        this.isInputLocked = false;
+        if (this.callbacks.onStats) this.callbacks.onStats(this.moves, this.timer);
+        this.triggerFlowCalc(); // Updates visuals
+    }
+
+    saveProgress() {
+        const rotations = [];
+        for (let row of this.grid) for (let t of row) rotations.push(t.rotation);
+
+        const state = {
+            level: this.level,
+            moves: this.moves,
+            timer: this.timer,
+            seedCode: this.currentSeedCode,
+            w: this.GRID_W,
+            h: this.GRID_H,
+            rotations: rotations,
+            victory: false // If victory, we wipe anyway
+        };
+        localStorage.setItem('hexenergy_state', JSON.stringify(state));
+    }
+
     reset() {
+        localStorage.removeItem('hexenergy_state');
         if (this.currentSeedCode) this.loadGameFromSeed(this.currentSeedCode);
     }
 
@@ -419,6 +493,7 @@ export class HexEnergyEngine {
         }
 
         tile.rotate();
+        this.saveProgress();
         this.triggerFlowCalc();
     }
 
@@ -519,6 +594,7 @@ export class HexEnergyEngine {
     triggerVictory() {
         this.isInputLocked = true;
         clearInterval(this.timerInterval);
+        localStorage.removeItem('hexenergy_state');
         this.audio.playVictory();
         this.endNodes.forEach(sink => this.spawnParticles(sink));
         if (this.callbacks.onVictory) this.callbacks.onVictory();

@@ -239,15 +239,57 @@ function reducer(state, action) {
     }
 }
 
+// Lazy Init for Persistence
+const init = (initial) => {
+    try {
+        const saved = localStorage.getItem('anxiety_state');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Basic validation
+            if (parsed.grid && parsed.score !== undefined) {
+                // Ensure events are cleared on reload to avoid re-triggering old sounds/particles
+                return { ...initial, ...parsed, events: [], paused: true }; // Pause on reload
+            }
+        }
+    } catch (e) {
+        console.error("Failed to load anxiety state", e);
+    }
+    return initial;
+};
+
 export function useAnxietyEngine() {
-    const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+    const [state, dispatch] = useReducer(reducer, INITIAL_STATE, init);
     const timerRef = useRef(null);
     const physicsRef = useRef(null);
 
-    // Initial Setup
+    // Persistence Effect
     useEffect(() => {
-        dispatch({ type: 'RESET' });
-    }, []);
+        if (!state.gameOver) {
+            // throttle save? For now, every render is okay as React batches, but stringify is heavy.
+            // Let's rely on React's scheduling.
+            // Exclude large transient objects if any? Grid is largest. 10x8 objects. Small enough.
+            localStorage.setItem('anxiety_state', JSON.stringify({
+                grid: state.grid,
+                preview: state.preview,
+                previewIndex: state.previewIndex,
+                score: state.score,
+                level: state.level,
+                levelScore: state.levelScore,
+                inventory: state.inventory,
+                tickRate: state.tickRate,
+                gameOver: state.gameOver
+            }));
+        } else {
+            localStorage.removeItem('anxiety_state');
+        }
+    }, [state]);
+
+    // Initial Setup (Removed RESET dispatch since we use lazy init now)
+    // useEffect(() => { dispatch({ type: 'RESET' }); }, []); 
+    // ^ If we leave this, it overrides the loaded state!
+    // We should only RESET if we explicitly want to, OR if state is invalid.
+    // Lazy init handles the initial state.
+
 
     // Tick Loop (Filling Preview)
     useEffect(() => {

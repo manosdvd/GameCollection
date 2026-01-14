@@ -7,10 +7,35 @@ export default function LightsOutGame() {
     const { playClick, playSuccess, playTone } = useSound();
 
     // Grid: flat array of booleans
-    const [grid, setGrid] = useState(() => createProblem(5)); // Start with simple 5 moves
-    const [moves, setMoves] = useState(0);
+    const [grid, setGrid] = useState(() => {
+        const saved = localStorage.getItem('lightsout_state');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.grid && parsed.grid.length === 25) return parsed.grid;
+        }
+        return createProblem(5);
+    });
+
+    const [moves, setMoves] = useState(() => {
+        const saved = localStorage.getItem('lightsout_state');
+        return saved ? JSON.parse(saved).moves || 0 : 0;
+    });
+
     const [solved, setSolved] = useState(false);
-    const [hint, setHint] = useState(null); // {x, y} next move hint
+    const [hint, setHint] = useState(null);
+
+    // Persistence Effect
+    useEffect(() => {
+        if (!solved) {
+            localStorage.setItem('lightsout_state', JSON.stringify({ grid, moves }));
+        } else {
+            localStorage.removeItem('lightsout_state'); // Clear on solve? Or keep? 
+            // Logic: If solved, maybe clear so next time is fresh? 
+            // User wants to prevent data loss on refresh. If solved, they are done.
+            // Let's keep it until they hit "New Game".
+            localStorage.setItem('lightsout_state', JSON.stringify({ grid, moves, solved: true }));
+        }
+    }, [grid, moves, solved]);
 
     useEffect(() => {
         if (isSolved(grid)) {
@@ -33,10 +58,12 @@ export default function LightsOutGame() {
 
     const handleNewGame = () => {
         playTone(600, 'sine', 0.1);
-        setGrid(createProblem(15));
+        const newGrid = createProblem(15);
+        setGrid(newGrid);
         setMoves(0);
         setSolved(false);
         setHint(null);
+        localStorage.removeItem('lightsout_state');
     };
 
     const handleReset = () => {
