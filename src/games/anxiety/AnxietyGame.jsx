@@ -40,7 +40,7 @@ export default function AnxietyGame() {
     } = useAnxietyEngine();
 
     const { playClick, playSuccess, playError, playTone } = useSound();
-    const { triggerHaptic } = useSettings();
+    const { triggerHaptic, colorBlindMode } = useSettings();
 
     const [selected, setSelected] = useState(null);
     const [shake, setShake] = useState(false);
@@ -237,6 +237,7 @@ export default function AnxietyGame() {
                 )}
             </div>
 
+            {/* Main Grid */}
             <div
                 className="w-full max-w-md aspect-[4/5] bg-black/40 rounded-lg p-1 grid gap-1 relative z-10 border border-white/10"
                 style={{
@@ -286,11 +287,14 @@ export default function AnxietyGame() {
                                     "rounded relative transition-all duration-100 flex items-center justify-center cursor-pointer overflow-hidden",
                                     !tile && "bg-white/5 hover:bg-white/10",
                                     tile && COLOR_STYLES[tile.color],
-                                    tile && "border hover:brightness-125 shadow-sm",
+                                    tile && "border hover:brightness-125 shadow-lg", // Increased shadow (lighted glow)
+                                    // Add glow effect using inline style for dynamic color
                                     isSelected && "ring-2 ring-white z-20 scale-105 brightness-150"
                                 )}
+                                style={tile ? { boxShadow: `0 0 15px ${tile.color}` } : {}} // Glow (fallback color name works in css?)
+                            // Actually, tile.color is 'red', 'blue', etc. which are valid CSS colors.
                             >
-                                {tile && (() => {
+                                {tile && colorBlindMode && (() => {
                                     const idx = COLORS.indexOf(tile.color);
                                     const Shape = ShapeIcons[SHAPES[idx]];
                                     return <div className="p-1.5 w-full h-full"><Shape /></div>;

@@ -538,7 +538,7 @@ export class HexEnergyEngine {
         let r_h = safeH / gridH_units;
         let R = Math.min(r_w, r_h);
 
-        if (R > 120) R = 120;
+        if (R > 300) R = 300;
         if (R < 18) R = 18;
 
         this.TILE_R = R;

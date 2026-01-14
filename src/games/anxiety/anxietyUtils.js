@@ -8,7 +8,7 @@ export const randomColor = () => TILE_COLORS[Math.floor(Math.random() * TILE_COL
 export const createEmptyGrid = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 
 // Initialize grid with bottom N rows filled
-export const initGrid = (rowsFilled = 3) => {
+export const initGrid = (rowsFilled = 0) => {
     const grid = createEmptyGrid();
     for (let y = ROWS - 1; y >= ROWS - rowsFilled; y--) {
         for (let x = 0; x < COLS; x++) {

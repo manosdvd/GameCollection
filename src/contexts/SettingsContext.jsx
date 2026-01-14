@@ -28,9 +28,20 @@ export function SettingsProvider({ children }) {
         }
     }, []);
 
+    const [colorBlindMode, setColorBlindMode] = useState(() => {
+        const saved = localStorage.getItem('color_blind_mode');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('color_blind_mode', JSON.stringify(colorBlindMode));
+    }, [colorBlindMode]);
+
     const value = {
         hapticsEnabled,
         setHapticsEnabled,
+        colorBlindMode,
+        setColorBlindMode,
         triggerHaptic,
         resetAllData
     };

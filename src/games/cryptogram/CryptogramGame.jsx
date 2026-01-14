@@ -410,9 +410,9 @@ export default function CryptogramGame() {
                                 <div className="flex justify-center animate-bounce mt-8">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); startNewGame(); }}
-                                        className="px-8 py-3 bg-primary text-black rounded-xl font-bold shadow-[0_0_20px_rgba(0,255,170,0.3)] hover:shadow-[0_0_40px_rgba(0,255,170,0.5)] transition-all"
+                                        className="px-8 py-3 bg-emerald-500 text-black rounded-xl font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:bg-emerald-400 transition-all border border-emerald-400"
                                     >
-                                        Next Quote
+                                        Next Puzzle
                                     </button>
                                 </div>
                             )}

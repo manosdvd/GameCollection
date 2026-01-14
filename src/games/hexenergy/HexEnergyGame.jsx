@@ -84,29 +84,12 @@ export default function HexEnergyGame() {
             </div>
 
             {/* Game Canvas Container */}
-            <div ref={containerRef} className="flex-1 w-full h-full relative touch-none">
+            <div ref={containerRef} className="flex-1 w-full h-full relative touch-none flex items-center justify-center">
                 {/* Engine places #hex-grid here */}
             </div>
 
-            {/* Bottom Controls */}
-            {!victory && (
-                <div className="absolute bottom-8 w-full flex justify-center gap-4 pointer-events-auto z-10">
-                    <button
-                        onClick={handleReset}
-                        className="p-3 rounded-full bg-surface/80 border border-white/10 text-white hover:bg-white/10 transition-colors"
-                        title="Reset Puzzle"
-                    >
-                        <RotateCcw size={20} />
-                    </button>
-                    <button
-                        onClick={() => engineRef.current && engineRef.current.loadLevel(level)}
-                        className="p-3 rounded-full bg-surface/80 border border-white/10 text-white hover:bg-white/10 transition-colors"
-                        title="New Random Puzzle"
-                    >
-                        <RefreshCw size={20} />
-                    </button>
-                </div>
-            )}
+            {/* Bottom Controls Removed per User Request */}
+            {/* {!victory && ( ...buttons... )} */}
 
             {/* Victory Screen */}
             <div className={`
