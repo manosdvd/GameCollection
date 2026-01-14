@@ -3,6 +3,7 @@ import Shell from './layouts/Shell';
 import Home from './pages/Home';
 import CryptogramGame from './games/cryptogram/CryptogramGame';
 import HexEnergyGame from './games/hexenergy/HexEnergyGame';
+import AnxietyGame from './games/anxiety/AnxietyGame';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/cryptogram" element={<CryptogramGame />} />
           <Route path="/hexenergy" element={<HexEnergyGame />} />
+          <Route path="/anxiety" element={<AnxietyGame />} />
         </Route>
       </Routes>
     </BrowserRouter>

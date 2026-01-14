@@ -426,7 +426,7 @@ export default function CryptogramGame() {
             </main>
 
             {!solved && !loading && (
-                <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-white/10 z-50 w-full shadow-[0_-5px_20px_rgba(0,0,0,0.5)]" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-white/10 z-50 w-full shadow-[0_-5px_20px_rgba(0,0,0,0.5)]" onClick={(e) => e.stopPropagation()}>
                     <GameControls
                         onHint={giveHint}
                         onCheck={toggleCheckWork}

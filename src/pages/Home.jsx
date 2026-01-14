@@ -4,7 +4,7 @@ import { Gamepad2, Grid, Hexagon, Lightbulb, SortAsc } from 'lucide-react';
 const GAMES = [
     { id: 'cryptogram', name: 'Cryptogram', icon: SortAsc, color: 'text-emerald-400', path: '/cryptogram' },
     { id: 'hexenergy', name: 'HexEnergy', icon: Hexagon, color: 'text-cyan-400', path: '/hexenergy' },
-    { id: 'anxiety', name: 'Anxiety', icon: Grid, color: 'text-amber-400', path: '/anxiety', disabled: true },
+    { id: 'anxiety', name: 'Anxiety', icon: Grid, color: 'text-amber-400', path: '/anxiety', disabled: false },
     { id: 'lightsout', name: 'Lights Out', icon: Lightbulb, color: 'text-yellow-200', path: '/lightsout', disabled: true },
     { id: 'jewelled', name: 'Jewelled', icon: Gamepad2, color: 'text-purple-400', path: '/jewelled', disabled: true },
 ];
