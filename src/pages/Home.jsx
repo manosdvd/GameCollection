@@ -5,7 +5,7 @@ const GAMES = [
     { id: 'cryptogram', name: 'Cryptogram', icon: SortAsc, color: 'text-emerald-400', path: '/cryptogram' },
     { id: 'hexenergy', name: 'HexEnergy', icon: Hexagon, color: 'text-cyan-400', path: '/hexenergy' },
     { id: 'anxiety', name: 'Anxiety', icon: Grid, color: 'text-amber-400', path: '/anxiety', disabled: false },
-    { id: 'lightsout', name: 'Lights Out', icon: Lightbulb, color: 'text-yellow-200', path: '/lightsout', disabled: true },
+    { id: 'lightsout', name: 'Lights Out', icon: Lightbulb, color: 'text-yellow-200', path: '/lightsout', disabled: false },
     { id: 'jewelled', name: 'Jewelled', icon: Gamepad2, color: 'text-purple-400', path: '/jewelled', disabled: true },
 ];
 
