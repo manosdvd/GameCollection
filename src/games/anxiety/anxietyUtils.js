@@ -1,13 +1,14 @@
+// Dimensions
+export const ROWS = 10;
 export const COLS = 8;
-export const ROWS = 8;
-export const TILE_COLORS = ['red', 'blue', 'green', 'yellow', 'purple'];
+export const TILE_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'cyan'];
 
 export const randomColor = () => TILE_COLORS[Math.floor(Math.random() * TILE_COLORS.length)];
 
-export const createEmptyGrid = () => Array(ROWS).fill(null).map(() => Array(COLS).fill(null));
+export const createEmptyGrid = () => Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 
 // Initialize grid with bottom N rows filled
-export const initGrid = (rowsFilled = 4) => {
+export const initGrid = (rowsFilled = 3) => {
     const grid = createEmptyGrid();
     for (let y = ROWS - 1; y >= ROWS - rowsFilled; y--) {
         for (let x = 0; x < COLS; x++) {
@@ -17,9 +18,11 @@ export const initGrid = (rowsFilled = 4) => {
     return grid;
 };
 
-// Check for matches (3+ in a row/col)
-// Returns array of {x, y} to remove
-export const findMatches = (grid) => {
+// Check matches (3+ in a row/col)
+// Returns { matches: [{x,y}], grid: matchedGrid } 
+// Logic changed: return matches list AND a grid copy where they are marked? 
+// No, the reducer expects `{ matches, grid }`.
+export const findMatches = (grid, ROWS, COLS) => {
     const matched = new Set();
 
     // Horizontal
@@ -62,14 +65,18 @@ export const findMatches = (grid) => {
         if (currentRun.length >= 3) currentRun.forEach(p => matched.add(`${p.x},${p.y}`));
     }
 
-    return Array.from(matched).map(s => {
+    // Return unique matches
+    const matchesList = Array.from(matched).map(s => {
         const [x, y] = s.split(',').map(Number);
         return { x, y };
     });
+
+    // Return grid copy (unchanged, just passed through)
+    return { matches: matchesList, grid: grid };
 };
 
 // Apply gravity: Move tiles down to fill empty spaces
-export const applyGravity = (grid) => {
+export const applyGravity = (grid, ROWS, COLS) => {
     const newGrid = grid.map(row => [...row]);
     let moved = false;
 
