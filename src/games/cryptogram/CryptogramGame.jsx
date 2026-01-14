@@ -349,7 +349,7 @@ export default function CryptogramGame() {
             </div>
 
             <main className="flex-grow overflow-y-auto w-full relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                <div className="max-w-4xl mx-auto px-4 py-8 pb-64">
+                <div className="max-w-4xl mx-auto px-4 py-8 pb-96">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-64 text-white/30 animate-pulse">
                             <p>Loading Quote...</p>
