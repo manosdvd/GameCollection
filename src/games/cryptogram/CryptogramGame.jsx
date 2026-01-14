@@ -8,8 +8,12 @@ import { isLetter } from './utils/cipher';
 import { saveGameState, loadGameState, clearGameState, saveHighScore, loadHighScore } from './utils/storage';
 import { calculateScore } from './utils/score';
 import Timer from './components/Timer';
+import { useSound } from '../../contexts/SoundContext';
+import { useSettings } from '../../contexts/SettingsContext';
 
 export default function CryptogramGame() {
+    const { playClick, playSuccess, playError } = useSound();
+    const { triggerHaptic } = useSettings();
     const [loading, setLoading] = useState(true);
     const [originalQuote, setOriginalQuote] = useState(null);
     const [author, setAuthor] = useState("");
@@ -141,6 +145,7 @@ export default function CryptogramGame() {
 
         setUserGuesses(prev => {
             const newGuesses = { ...prev };
+            triggerHaptic(5);
             if (guessChar === null) {
                 delete newGuesses[selectedEncryptedChar];
             } else {
@@ -154,6 +159,7 @@ export default function CryptogramGame() {
             if (isComplete) {
                 setSolved(true);
                 setShowConfetti(true);
+                playSuccess();
                 setCursorIndex(null);
                 setCheckMode(false);
                 clearGameState();
@@ -224,11 +230,13 @@ export default function CryptogramGame() {
             if (e.key === 'ArrowLeft') { moveCursor(-1); return; }
             if (isLetter(key)) {
                 if (cursorIndex !== null && selectedEncryptedChar) {
+                    playClick();
                     handleGuess(key);
                     moveCursorToNextUnfilled();
                 }
             } else if (e.key === 'Backspace' || e.key === 'Delete') {
                 if (cursorIndex !== null && selectedEncryptedChar) {
+                    playClick();
                     handleGuess(null);
                     if (e.key === 'Backspace') moveCursorLeft();
                 }
@@ -239,6 +247,7 @@ export default function CryptogramGame() {
     }, [cursorIndex, selectedEncryptedChar, solved, loading, moveCursor, handleGuess, moveCursorToNextUnfilled, moveCursorLeft]);
 
     const giveHint = () => {
+        playClick();
         if (solved || !originalQuote) return;
         if (selectedEncryptedChar && !hintedChars.has(selectedEncryptedChar)) {
             const correctPlain = reverseCipher[selectedEncryptedChar];
@@ -340,7 +349,7 @@ export default function CryptogramGame() {
             </div>
 
             <main className="flex-grow overflow-y-auto w-full relative scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
+                <div className="max-w-4xl mx-auto px-4 py-8 pb-64">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-64 text-white/30 animate-pulse">
                             <p>Loading Quote...</p>
@@ -417,7 +426,7 @@ export default function CryptogramGame() {
             </main>
 
             {!solved && !loading && (
-                <div className="flex-none bg-surface border-t border-white/10 z-20 w-full" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-white/10 z-50 w-full shadow-[0_-5px_20px_rgba(0,0,0,0.5)]" onClick={(e) => e.stopPropagation()}>
                     <GameControls
                         onHint={giveHint}
                         onCheck={toggleCheckWork}
@@ -427,8 +436,8 @@ export default function CryptogramGame() {
                         hintedChars={hintedChars}
                     />
                     <Keyboard
-                        onGuess={(char) => { handleGuess(char); moveCursorToNextUnfilled(); }}
-                        onDelete={() => { handleGuess(null); moveCursorLeft(); }}
+                        onGuess={(char) => { playClick(); handleGuess(char); moveCursorToNextUnfilled(); }}
+                        onDelete={() => { playClick(); handleGuess(null); moveCursorLeft(); }}
                         selectedEncryptedChar={selectedEncryptedChar}
                         solved={solved}
                         hintedChars={hintedChars}

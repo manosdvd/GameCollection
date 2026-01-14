@@ -1,10 +1,12 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { Settings, Menu as MenuIcon } from 'lucide-react';
+import { Settings, Menu as MenuIcon, Volume2, VolumeX } from 'lucide-react';
 import Clock from '../components/Clock';
+import { useSound } from '../contexts/SoundContext';
 
 export default function Shell() {
     const location = useLocation();
     const isHome = location.pathname === '/';
+    const { enabled, setEnabled } = useSound();
 
     return (
         <div className="min-h-screen bg-background text-white flex flex-col font-sans">
@@ -23,6 +25,17 @@ export default function Shell() {
 
                 <div className="flex items-center gap-6">
                     <Clock />
+                    <button
+                        onClick={() => setEnabled(!enabled)}
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                        title={enabled ? "Mute Sound" : "Enable Sound"}
+                    >
+                        {enabled ? (
+                            <Volume2 className="w-6 h-6 text-primary hover:text-white transition-colors" />
+                        ) : (
+                            <VolumeX className="w-6 h-6 text-secondary hover:text-red-400 transition-colors" />
+                        )}
+                    </button>
                     <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
                         <Settings className="w-6 h-6 text-secondary hover:text-white transition-colors" />
                     </button>

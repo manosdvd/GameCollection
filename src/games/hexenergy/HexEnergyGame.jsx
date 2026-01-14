@@ -2,6 +2,8 @@ import { useRef, useLayoutEffect, useState } from 'react';
 import { HexEnergyEngine } from './engine';
 import './hexenergy.css';
 import { RefreshCw, RotateCcw, ChevronRight } from 'lucide-react';
+import { useSound } from '../../contexts/SoundContext';
+import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HexEnergyGame() {
     const containerRef = useRef(null);
@@ -12,6 +14,10 @@ export default function HexEnergyGame() {
     const [progress, setProgress] = useState(0);
     const [victory, setVictory] = useState(false);
 
+    // Audio Context
+    const { playClick, playSuccess, playTone } = useSound();
+    const { triggerHaptic } = useSettings();
+
     useLayoutEffect(() => {
         if (!containerRef.current) return;
 
@@ -20,6 +26,11 @@ export default function HexEnergyGame() {
             onStats: (m, t) => setStats({ moves: m, time: t }),
             onProgress: (p) => setProgress(p),
             onVictory: () => setVictory(true)
+        }, {
+            playClick,
+            playVictory: playSuccess,
+            playTone,
+            triggerHaptic
         });
 
         // Start Level 1

@@ -23,55 +23,7 @@ const NEIGHBOR_OFFSETS = [
     [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 0], [0, -1]]
 ];
 
-class SoundManager {
-    constructor() {
-        this.ctx = null;
-        this.enabled = true;
-    }
-
-    init() {
-        if (!this.enabled) return;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        this.ctx = new AudioContext();
-    }
-
-    playTone(freq, type, duration, vol = 0.1) {
-        if (!this.ctx) this.init();
-        if (!this.ctx || this.ctx.state === 'suspended') {
-            if (this.ctx) this.ctx.resume();
-        }
-        if (!this.ctx) return;
-
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-
-        gain.gain.setValueAtTime(0, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + duration);
-    }
-
-    playClick() {
-        this.playTone(800, 'sine', 0.1, 0.1);
-        setTimeout(() => this.playTone(1200, 'triangle', 0.05, 0.05), 50);
-    }
-
-    playVictory() {
-        const notes = [440, 554, 659, 880];
-        notes.forEach((f, i) => {
-            setTimeout(() => this.playTone(f, 'sine', 0.8, 0.2), i * 100);
-        });
-    }
-}
+// SoundManager removed in favor of SoundContext via React wrapper
 
 class Tile {
     constructor(x, y) {
@@ -142,10 +94,14 @@ class Tile {
 }
 
 export class HexEnergyEngine {
-    constructor(container, callbacks) {
+    constructor(container, callbacks, audioInterface) {
         this.container = container;
         this.callbacks = callbacks || {};
-        this.audio = new SoundManager();
+        this.audio = audioInterface || {
+            playClick: () => { },
+            playVictory: () => { },
+            playTone: () => { }
+        };
 
         this.grid = [];
         this.GRID_W = 4;
@@ -454,7 +410,7 @@ export class HexEnergyEngine {
 
     handleTap(tile) {
         if (this.isInputLocked) return;
-        if (navigator.vibrate) navigator.vibrate(5);
+        if (this.audio.triggerHaptic) this.audio.triggerHaptic(5);
 
         if (!tile.isAnchor) {
             this.moves++;
